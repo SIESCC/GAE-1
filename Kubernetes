@@ -1,0 +1,601 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+                                                                                                                                                                                                Try the new cross-platform PowerShell https://aka.ms/pscore6                                                                                                                                                                                                                                                                                                                                    PS C:\Windows\system32> minikube start --driver=hyperv                                                                                                                                          * minikube v1.35.0 on Microsoft Windows 10 Pro 10.0.19045.5487 Build 19045.5487                                                                                                                 * Using the hyperv driver based on user configuration
+* Downloading VM boot image ...
+    > minikube-v1.35.0-amd64.iso....:  65 B / 65 B [---------] 100.00% ? p/s 0s
+    > minikube-v1.35.0-amd64.iso:  345.38 MiB / 345.38 MiB  100.00% 10.12 MiB p
+* Starting "minikube" primary control-plane node in "minikube" cluster
+* Downloading Kubernetes v1.32.0 preload ...
+    > preloaded-images-k8s-v18-v1...:  333.57 MiB / 333.57 MiB  100.00% 9.28 Mi
+* Creating hyperv VM (CPUs=2, Memory=2200MB, Disk=20000MB) ...
+! Failing to connect to https://registry.k8s.io/ from inside the minikube VM
+* To pull new external images, you may need to configure a proxy: https://minikube.sigs.k8s.io/docs/reference/networking/proxy/
+* Preparing Kubernetes v1.32.0 on Docker 27.4.0 ...
+  - Generating certificates and keys ...
+  - Booting up control plane ...
+  - Configuring RBAC rules ...
+* Configuring bridge CNI (Container Networking Interface) ...
+* Verifying Kubernetes components...
+  - Using image gcr.io/k8s-minikube/storage-provisioner:v5
+* Enabled addons: storage-provisioner, default-storageclass
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+PS C:\Windows\system32> minikube status
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+PS C:\Windows\system32> minikube stop
+* Stopping node "minikube"  ...
+* Powering off "minikube" via SSH ...
+* 1 node stopped.
+PS C:\Windows\system32> minikube start
+* minikube v1.35.0 on Microsoft Windows 10 Pro 10.0.19045.5487 Build 19045.5487
+* Using the hyperv driver based on existing profile
+* Starting "minikube" primary control-plane node in "minikube" cluster
+* Restarting existing hyperv VM for "minikube" ...
+! Failing to connect to https://registry.k8s.io/ from inside the minikube VM
+* To pull new external images, you may need to configure a proxy: https://minikube.sigs.k8s.io/docs/reference/networking/proxy/
+* Preparing Kubernetes v1.32.0 on Docker 27.4.0 ...
+* Configuring bridge CNI (Container Networking Interface) ...
+* Verifying Kubernetes components...
+  - Using image gcr.io/k8s-minikube/storage-provisioner:v5
+* Enabled addons: storage-provisioner, default-storageclass
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+PS C:\Windows\system32> kubectl get nodes
+NAME       STATUS   ROLES           AGE     VERSION
+minikube   Ready    control-plane   7m50s   v1.32.0
+PS C:\Windows\system32> kubectl get pod
+No resources found in default namespace.
+PS C:\Windows\system32> kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   8m10s
+PS C:\Windows\system32> kubectl create deployment nginxdep --image=nginx
+deployment.apps/nginxdep created
+PS C:\Windows\system32> kubectl create deployment
+error: required flag(s) "image" not set
+PS C:\Windows\system32> kubectl get deployment
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+nginxdep   1/1     1            1           31s
+PS C:\Windows\system32> kubectl get pod
+NAME                        READY   STATUS    RESTARTS   AGE
+nginxdep-6c459cbc6d-m46cv   1/1     Running   0          49s
+PS C:\Windows\system32> kubectl get deployment
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+nginxdep   1/1     1            1           56s
+PS C:\Windows\system32> kubectl get replicaset
+NAME                  DESIRED   CURRENT   READY   AGE
+nginxdep-6c459cbc6d   1         1         1       71s
+PS C:\Windows\system32> kubectl edit deployment nginxdep
+Edit cancelled, no changes made.
+PS C:\Windows\system32> kubectl edit deployment nginxdep
+Edit cancelled, no changes made.
+PS C:\Windows\system32> kubectl get pod
+NAME                        READY   STATUS    RESTARTS   AGE
+nginxdep-6c459cbc6d-m46cv   1/1     Running   0          4m12s
+PS C:\Windows\system32> kubectl get pod
+NAME                        READY   STATUS    RESTARTS   AGE
+nginxdep-6c459cbc6d-m46cv   1/1     Running   0          4m44s
+PS C:\Windows\system32> kubectl get replicaset
+NAME                  DESIRED   CURRENT   READY   AGE
+nginxdep-6c459cbc6d   1         1         1       4m49s
+PS C:\Windows\system32> kubectl log nginxdep-6c459cbc6d-m46cv
+error: unknown command "log" for "kubectl"
+
+Did you mean this?
+        top
+        logs
+PS C:\Windows\system32> kubectl logs nginxdep-6c459cbc6d-m46cv
+/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf
+10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf
+/docker-entrypoint.sh: Sourcing /docker-entrypoint.d/15-local-resolvers.envsh
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh
+/docker-entrypoint.sh: Configuration complete; ready for start up
+2025/03/01 08:53:10 [notice] 1#1: using the "epoll" event method
+2025/03/01 08:53:10 [notice] 1#1: nginx/1.27.4
+2025/03/01 08:53:10 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14)
+2025/03/01 08:53:10 [notice] 1#1: OS: Linux 5.10.207
+2025/03/01 08:53:10 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2025/03/01 08:53:10 [notice] 1#1: start worker processes
+2025/03/01 08:53:10 [notice] 1#1: start worker process 29
+2025/03/01 08:53:10 [notice] 1#1: start worker process 30
+PS C:\Windows\system32> kubectl create deployment mongodep --image=mongo
+deployment.apps/mongodep created
+PS C:\Windows\system32> kubectl get deployment
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+mongodep   0/1     1            0           18s
+nginxdep   1/1     1            1           7m21s
+PS C:\Windows\system32> kubectl get pod
+NAME                        READY   STATUS              RESTARTS   AGE
+mongodep-799bb65b8-srtgw    0/1     ContainerCreating   0          22s
+nginxdep-6c459cbc6d-m46cv   1/1     Running             0          7m25s
+PS C:\Windows\system32> kubectl logs mongodep-799bb65b8-srtgw
+{"t":{"$date":"2025-03-01T09:00:33.123+00:00"},"s":"I",  "c":"CONTROL",  "id":23285,   "ctx":"main","msg":"Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'"}
+{"t":{"$date":"2025-03-01T09:00:33.126+00:00"},"s":"I",  "c":"CONTROL",  "id":5945603, "ctx":"main","msg":"Multi threading initialized"}
+{"t":{"$date":"2025-03-01T09:00:33.138+00:00"},"s":"I",  "c":"NETWORK",  "id":4648601, "ctx":"main","msg":"Implicit TCP FastOpen unavailable. If TCP FastOpen is required, set at least one of the related parameters","attr":{"relatedParameters":["tcpFastOpenServer","tcpFastOpenClient","tcpFastOpenQueueSize"]}}
+{"t":{"$date":"2025-03-01T09:00:33.142+00:00"},"s":"I",  "c":"NETWORK",  "id":4915701, "ctx":"main","msg":"Initialized wire specification","attr":{"spec":{"incomingExternalClient":{"minWireVersion":0,"maxWireVersion":25},"incomingInternalClient":{"minWireVersion":0,"maxWireVersion":25},"outgoing":{"minWireVersion":6,"maxWireVersion":25},"isInternalClient":true}}}
+{"t":{"$date":"2025-03-01T09:00:33.142+00:00"},"s":"I",  "c":"TENANT_M", "id":7091600, "ctx":"main","msg":"Starting TenantMigrationAccessBlockerRegistry"}
+{"t":{"$date":"2025-03-01T09:00:33.142+00:00"},"s":"I",  "c":"CONTROL",  "id":4615611, "ctx":"initandlisten","msg":"MongoDB starting","attr":{"pid":1,"port":27017,"dbPath":"/data/db","architecture":"64-bit","host":"mongodep-799bb65b8-srtgw"}}
+{"t":{"$date":"2025-03-01T09:00:33.142+00:00"},"s":"I",  "c":"CONTROL",  "id":23403,   "ctx":"initandlisten","msg":"Build Info","attr":{"buildInfo":{"version":"8.0.5","gitVersion":"cb9e2e5e552ee39dea1e39d7859336456d0c9820","openSSLVersion":"OpenSSL 3.0.13 30 Jan 2024","modules":[],"allocator":"tcmalloc-google","environment":{"distmod":"ubuntu2404","distarch":"x86_64","target_arch":"x86_64"}}}}
+{"t":{"$date":"2025-03-01T09:00:33.142+00:00"},"s":"I",  "c":"CONTROL",  "id":51765,   "ctx":"initandlisten","msg":"Operating System","attr":{"os":{"name":"Ubuntu","version":"24.04"}}}
+{"t":{"$date":"2025-03-01T09:00:33.142+00:00"},"s":"I",  "c":"CONTROL",  "id":21951,   "ctx":"initandlisten","msg":"Options set by command line","attr":{"options":{"net":{"bindIp":"*"}}}}
+{"t":{"$date":"2025-03-01T09:00:33.144+00:00"},"s":"I",  "c":"STORAGE",  "id":22297,   "ctx":"initandlisten","msg":"Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem","tags":["startupWarnings"]}
+{"t":{"$date":"2025-03-01T09:00:33.144+00:00"},"s":"I",  "c":"STORAGE",  "id":22315,   "ctx":"initandlisten","msg":"Opening WiredTiger","attr":{"config":"create,cache_size=544M,session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,remove=true,path=journal,compressor=snappy),builtin_extension_config=(zstd=(compression_level=6)),file_manager=(close_idle_time=600,close_scan_interval=10,close_handle_minimum=2000),statistics_log=(wait=0),json_output=(error,message),verbose=[recovery_progress:1,checkpoint_progress:1,compact_progress:1,backup:0,checkpoint:0,compact:0,evict:0,history_store:0,recovery:0,rts:0,salvage:0,tiered:0,timestamp:0,transaction:0,verify:0,log:0],prefetch=(available=true,default=false),"}}
+{"t":{"$date":"2025-03-01T09:00:33.731+00:00"},"s":"I",  "c":"WTRECOV",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":{"ts_sec":1740819633,"ts_usec":731912,"thread":"1:0x7f2b17a06680","session_name":"txn-recover","category":"WT_VERB_RECOVERY_PROGRESS","category_id":34,"verbose_level":"DEBUG_1","verbose_level_id":1,"msg":"recovery log replay has successfully finished and ran for 0 milliseconds"}}}
+{"t":{"$date":"2025-03-01T09:00:33.732+00:00"},"s":"I",  "c":"WTRECOV",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":{"ts_sec":1740819633,"ts_usec":732023,"thread":"1:0x7f2b17a06680","session_name":"txn-recover","category":"WT_VERB_RECOVERY_PROGRESS","category_id":34,"verbose_level":"DEBUG_1","verbose_level_id":1,"msg":"Set global recovery timestamp: (0, 0)"}}}
+{"t":{"$date":"2025-03-01T09:00:33.732+00:00"},"s":"I",  "c":"WTRECOV",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":{"ts_sec":1740819633,"ts_usec":732048,"thread":"1:0x7f2b17a06680","session_name":"txn-recover","category":"WT_VERB_RECOVERY_PROGRESS","category_id":34,"verbose_level":"DEBUG_1","verbose_level_id":1,"msg":"Set global oldest timestamp: (0, 0)"}}}
+{"t":{"$date":"2025-03-01T09:00:33.732+00:00"},"s":"I",  "c":"WTRECOV",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":{"ts_sec":1740819633,"ts_usec":732080,"thread":"1:0x7f2b17a06680","session_name":"txn-recover","category":"WT_VERB_RECOVERY_PROGRESS","category_id":34,"verbose_level":"DEBUG_1","verbose_level_id":1,"msg":"recovery was completed successfully and took 0ms, including 0ms for the log replay, 0ms for the rollback to stable, and 0ms for the checkpoint."}}}
+{"t":{"$date":"2025-03-01T09:00:33.774+00:00"},"s":"I",  "c":"STORAGE",  "id":4795906, "ctx":"initandlisten","msg":"WiredTiger opened","attr":{"durationMillis":629}}
+{"t":{"$date":"2025-03-01T09:00:33.774+00:00"},"s":"I",  "c":"RECOVERY", "id":23987,   "ctx":"initandlisten","msg":"WiredTiger recoveryTimestamp","attr":{"recoveryTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+{"t":{"$date":"2025-03-01T09:00:33.791+00:00"},"s":"I",  "c":"STORAGE",  "id":9529901, "ctx":"initandlisten","msg":"Initializing durable catalog","attr":{"numRecords":0}}
+{"t":{"$date":"2025-03-01T09:00:33.791+00:00"},"s":"I",  "c":"STORAGE",  "id":9529902, "ctx":"initandlisten","msg":"Retrieving all idents from storage engine"}
+{"t":{"$date":"2025-03-01T09:00:33.791+00:00"},"s":"I",  "c":"STORAGE",  "id":9529903, "ctx":"initandlisten","msg":"Initializing all collections in durable catalog","attr":{"numEntries":0}}
+{"t":{"$date":"2025-03-01T09:00:33.797+00:00"},"s":"W",  "c":"CONTROL",  "id":22120,   "ctx":"initandlisten","msg":"Access control is not enabled for the database. Read and write access to data and configuration is unrestricted","tags":["startupWarnings"]}
+{"t":{"$date":"2025-03-01T09:00:33.797+00:00"},"s":"W",  "c":"CONTROL",  "id":9068900, "ctx":"initandlisten","msg":"For customers running the current memory allocator, we suggest changing the contents of the following sysfsFile","attr":{"allocator":"tcmalloc-google","sysfsFile":"/sys/kernel/mm/transparent_hugepage/enabled","currentValue":"never","desiredValue":"always"},"tags":["startupWarnings"]}
+{"t":{"$date":"2025-03-01T09:00:33.797+00:00"},"s":"W",  "c":"CONTROL",  "id":9068900, "ctx":"initandlisten","msg":"For customers running the current memory allocator, we suggest changing the contents of the following sysfsFile","attr":{"allocator":"tcmalloc-google","sysfsFile":"/sys/kernel/mm/transparent_hugepage/defrag","currentValue":"madvise","desiredValue":"defer+madvise"},"tags":["startupWarnings"]}
+{"t":{"$date":"2025-03-01T09:00:33.798+00:00"},"s":"W",  "c":"CONTROL",  "id":8640302, "ctx":"initandlisten","msg":"We suggest setting the contents of sysfsFile to 0.","attr":{"sysfsFile":"/sys/kernel/mm/transparent_hugepage/khugepaged/max_ptes_none","currentValue":511},"tags":["startupWarnings"]}
+{"t":{"$date":"2025-03-01T09:00:33.798+00:00"},"s":"W",  "c":"CONTROL",  "id":8718500, "ctx":"initandlisten","msg":"Your system has glibc support for rseq built in, which is not yet supported by tcmalloc-google and has critical performance implications. Please set the environment variable GLIBC_TUNABLES=glibc.pthread.rseq=0","tags":["startupWarnings"]}
+{"t":{"$date":"2025-03-01T09:00:33.798+00:00"},"s":"W",  "c":"NETWORK",  "id":5123300, "ctx":"initandlisten","msg":"vm.max_map_count is too low","attr":{"currentValue":65530,"recommendedMinimum":1677720,"maxConns":838860},"tags":["startupWarnings"]}
+{"t":{"$date":"2025-03-01T09:00:33.798+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"initandlisten","msg":"createCollection","attr":{"namespace":"admin.system.version","uuidDisposition":"provided","uuid":{"uuid":{"$uuid":"8357a921-90e1-4804-85a6-4350cef3718e"}},"options":{"uuid":{"$uuid":"8357a921-90e1-4804-85a6-4350cef3718e"}}}}
+{"t":{"$date":"2025-03-01T09:00:33.811+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"initandlisten","msg":"Index build: done building","attr":{"buildUUID":null,"collectionUUID":{"uuid":{"$uuid":"8357a921-90e1-4804-85a6-4350cef3718e"}},"namespace":"admin.system.version","index":"_id_","ident":"index-1-16288986074542226937","collectionIdent":"collection-0-16288986074542226937","commitTimestamp":null}}
+{"t":{"$date":"2025-03-01T09:00:33.811+00:00"},"s":"I",  "c":"REPL",     "id":20459,   "ctx":"initandlisten","msg":"Setting featureCompatibilityVersion","attr":{"newVersion":"8.0"}}
+{"t":{"$date":"2025-03-01T09:00:33.811+00:00"},"s":"I",  "c":"REPL",     "id":5853300, "ctx":"initandlisten","msg":"current featureCompatibilityVersion value","attr":{"featureCompatibilityVersion":"8.0","context":"setFCV"}}
+{"t":{"$date":"2025-03-01T09:00:33.812+00:00"},"s":"I",  "c":"NETWORK",  "id":4915702, "ctx":"initandlisten","msg":"Updated wire specification","attr":{"oldSpec":{"incomingExternalClient":{"minWireVersion":0,"maxWireVersion":25},"incomingInternalClient":{"minWireVersion":0,"maxWireVersion":25},"outgoing":{"minWireVersion":6,"maxWireVersion":25},"isInternalClient":true},"newSpec":{"incomingExternalClient":{"minWireVersion":0,"maxWireVersion":25},"incomingInternalClient":{"minWireVersion":25,"maxWireVersion":25},"outgoing":{"minWireVersion":25,"maxWireVersion":25},"isInternalClient":true}}}
+{"t":{"$date":"2025-03-01T09:00:33.812+00:00"},"s":"I",  "c":"NETWORK",  "id":4915702, "ctx":"initandlisten","msg":"Updated wire specification","attr":{"oldSpec":{"incomingExternalClient":{"minWireVersion":0,"maxWireVersion":25},"incomingInternalClient":{"minWireVersion":25,"maxWireVersion":25},"outgoing":{"minWireVersion":25,"maxWireVersion":25},"isInternalClient":true},"newSpec":{"incomingExternalClient":{"minWireVersion":0,"maxWireVersion":25},"incomingInternalClient":{"minWireVersion":25,"maxWireVersion":25},"outgoing":{"minWireVersion":25,"maxWireVersion":25},"isInternalClient":true}}}
+{"t":{"$date":"2025-03-01T09:00:33.812+00:00"},"s":"I",  "c":"REPL",     "id":5853300, "ctx":"initandlisten","msg":"current featureCompatibilityVersion value","attr":{"featureCompatibilityVersion":"8.0","context":"startup"}}
+{"t":{"$date":"2025-03-01T09:00:33.812+00:00"},"s":"I",  "c":"STORAGE",  "id":5071100, "ctx":"initandlisten","msg":"Clearing temp directory"}
+{"t":{"$date":"2025-03-01T09:00:33.812+00:00"},"s":"I",  "c":"CONTROL",  "id":6608200, "ctx":"initandlisten","msg":"Initializing cluster server parameters from disk"}
+{"t":{"$date":"2025-03-01T09:00:33.812+00:00"},"s":"I",  "c":"CONTROL",  "id":20536,   "ctx":"initandlisten","msg":"Flow Control is enabled on this deployment"}
+{"t":{"$date":"2025-03-01T09:00:33.812+00:00"},"s":"I",  "c":"FTDC",     "id":20625,   "ctx":"initandlisten","msg":"Initializing full-time diagnostic data capture","attr":{"dataDirectory":"/data/db/diagnostic.data"}}
+{"t":{"$date":"2025-03-01T09:00:33.821+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"initandlisten","msg":"createCollection","attr":{"namespace":"local.startup_log","uuidDisposition":"generated","uuid":{"uuid":{"$uuid":"ca983f91-4a9c-4111-b105-0d5a108ce4c3"}},"options":{"capped":true,"size":10485760}}}
+{"t":{"$date":"2025-03-01T09:00:33.851+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"initandlisten","msg":"Index build: done building","attr":{"buildUUID":null,"collectionUUID":{"uuid":{"$uuid":"ca983f91-4a9c-4111-b105-0d5a108ce4c3"}},"namespace":"local.startup_log","index":"_id_","ident":"index-3-16288986074542226937","collectionIdent":"collection-2-16288986074542226937","commitTimestamp":null}}
+{"t":{"$date":"2025-03-01T09:00:33.851+00:00"},"s":"I",  "c":"REPL",     "id":6015317, "ctx":"initandlisten","msg":"Setting new configuration state","attr":{"newState":"ConfigReplicationDisabled","oldState":"ConfigPreStart"}}
+{"t":{"$date":"2025-03-01T09:00:33.851+00:00"},"s":"I",  "c":"STORAGE",  "id":22262,   "ctx":"initandlisten","msg":"Timestamp monitor starting"}
+{"t":{"$date":"2025-03-01T09:00:33.851+00:00"},"s":"I",  "c":"STORAGE",  "id":7333401, "ctx":"initandlisten","msg":"Starting the DiskSpaceMonitor"}
+{"t":{"$date":"2025-03-01T09:00:33.853+00:00"},"s":"I",  "c":"NETWORK",  "id":23015,   "ctx":"listener","msg":"Listening on","attr":{"address":"/tmp/mongodb-27017.sock"}}
+{"t":{"$date":"2025-03-01T09:00:33.853+00:00"},"s":"I",  "c":"NETWORK",  "id":23015,   "ctx":"listener","msg":"Listening on","attr":{"address":"0.0.0.0:27017"}}
+{"t":{"$date":"2025-03-01T09:00:33.853+00:00"},"s":"I",  "c":"NETWORK",  "id":23016,   "ctx":"listener","msg":"Waiting for connections","attr":{"port":27017,"ssl":"off"}}
+{"t":{"$date":"2025-03-01T09:00:33.853+00:00"},"s":"I",  "c":"CONTROL",  "id":8423403, "ctx":"initandlisten","msg":"mongod startup complete","attr":{"Summary of time elapsed":{"Startup from clean shutdown?":true,"Statistics":{"Set up periodic runner":"0 ms","Set up online certificate status protocol manager":"0 ms","Transport layer setup":"0 ms","Run initial syncer crash recovery":"0 ms","Create storage engine lock file in the data directory":"0 ms","Get metadata describing storage engine":"0 ms","Create storage engine":"647 ms","Write current PID to file":"0 ms","Write a new metadata for storage engine":"0 ms","Initialize FCV before rebuilding indexes":"0 ms","Drop abandoned idents and get back indexes that need to be rebuilt or builds that need to be restarted":"0 ms","Rebuild indexes for collections":"0 ms","Load cluster parameters from disk for a standalone":"0 ms","Build user and roles graph":"0 ms","Set up the background thread pool responsible for waiting for opTimes to be majority committed":"0 ms","Start up the replication coordinator":"0 ms","Ensure the change stream collections on startup contain consistent data":"0 ms","Write startup options to the audit log":"0 ms","Start transport layer":"1 ms","_initAndListen total elapsed time":"711 ms"}}}}
+{"t":{"$date":"2025-03-01T09:00:33.863+00:00"},"s":"I",  "c":"CONTROL",  "id":20712,   "ctx":"LogicalSessionCacheReap","msg":"Sessions collection is not set up; waiting until next sessions reap interval","attr":{"error":"NamespaceNotFound: config.system.sessions does not exist"}}
+{"t":{"$date":"2025-03-01T09:00:33.864+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"LogicalSessionCacheRefresh","msg":"createCollection","attr":{"namespace":"config.system.sessions","uuidDisposition":"generated","uuid":{"uuid":{"$uuid":"820b35c5-280d-4451-a1d9-8bfcad59893e"}},"options":{}}}
+{"t":{"$date":"2025-03-01T09:00:33.887+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"LogicalSessionCacheRefresh","msg":"Index build: done building","attr":{"buildUUID":null,"collectionUUID":{"uuid":{"$uuid":"820b35c5-280d-4451-a1d9-8bfcad59893e"}},"namespace":"config.system.sessions","index":"_id_","ident":"index-5-16288986074542226937","collectionIdent":"collection-4-16288986074542226937","commitTimestamp":null}}
+{"t":{"$date":"2025-03-01T09:00:33.887+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"LogicalSessionCacheRefresh","msg":"Index build: done building","attr":{"buildUUID":null,"collectionUUID":{"uuid":{"$uuid":"820b35c5-280d-4451-a1d9-8bfcad59893e"}},"namespace":"config.system.sessions","index":"lsidTTLIndex","ident":"index-6-16288986074542226937","collectionIdent":"collection-4-16288986074542226937","commitTimestamp":null}}
+{"t":{"$date":"2025-03-01T09:00:34.006+00:00"},"s":"W",  "c":"CONTROL",  "id":636300,  "ctx":"ftdc","msg":"Use of deprecated server parameter name","attr":{"deprecatedName":"internalQueryCacheSize","canonicalName":"internalQueryCacheMaxEntriesPerCollection"}}
+{"t":{"$date":"2025-03-01T09:00:34.006+00:00"},"s":"W",  "c":"CONTROL",  "id":636300,  "ctx":"ftdc","msg":"Use of deprecated server parameter name","attr":{"deprecatedName":"oplogSamplingLogIntervalSeconds","canonicalName":"collectionSamplingLogIntervalSeconds"}}
+{"t":{"$date":"2025-03-01T09:00:34.006+00:00"},"s":"W",  "c":"NETWORK",  "id":23803,   "ctx":"ftdc","msg":"Use of deprecated server parameter 'sslMode', please use 'tlsMode' instead."}
+{"t":{"$date":"2025-03-01T09:00:34.006+00:00"},"s":"W",  "c":"CONTROL",  "id":636300,  "ctx":"ftdc","msg":"Use of deprecated server parameter name","attr":{"deprecatedName":"wiredTigerConcurrentReadTransactions","canonicalName":"storageEngineConcurrentReadTransactions"}}
+{"t":{"$date":"2025-03-01T09:00:34.006+00:00"},"s":"W",  "c":"CONTROL",  "id":636300,  "ctx":"ftdc","msg":"Use of deprecated server parameter name","attr":{"deprecatedName":"wiredTigerConcurrentWriteTransactions","canonicalName":"storageEngineConcurrentWriteTransactions"}}
+PS C:\Windows\system32> kubectl describe pod mongodep-799bb65b8-srtgw
+Name:             mongodep-799bb65b8-srtgw
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             minikube/172.23.188.202
+Start Time:       Sat, 01 Mar 2025 14:30:01 +0530
+Labels:           app=mongodep
+                  pod-template-hash=799bb65b8
+Annotations:      <none>
+Status:           Running
+IP:               10.244.0.5
+IPs:
+  IP:           10.244.0.5
+Controlled By:  ReplicaSet/mongodep-799bb65b8
+Containers:
+  mongo:
+    Container ID:   docker://58fabdd9da3359633372263dda5fa75379d40c582b6317512de88e5a22e4c172
+    Image:          mongo
+    Image ID:       docker-pullable://mongo@sha256:f6164e498dbaee3966031c1ced1bfa0fd1c4961151b38a770fa6994f4b0dcae7
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Sat, 01 Mar 2025 14:30:32 +0530
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-bmqc2 (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True
+  Initialized                 True
+  Ready                       True
+  ContainersReady             True
+  PodScheduled                True
+Volumes:
+  kube-api-access-bmqc2:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  2m37s  default-scheduler  Successfully assigned default/mongodep-799bb65b8-srtgw to minikube
+  Normal  Pulling    2m36s  kubelet            Pulling image "mongo"
+  Normal  Pulled     2m7s   kubelet            Successfully pulled image "mongo" in 29.938s (29.938s including waiting). Image size: 886929028 bytes.
+  Normal  Created    2m6s   kubelet            Created container: mongo
+  Normal  Started    2m6s   kubelet            Started container mongo
+PS C:\Windows\system32> kubectl get pod
+NAME                        READY   STATUS    RESTARTS   AGE
+mongodep-799bb65b8-srtgw    1/1     Running   0          3m41s
+nginxdep-6c459cbc6d-m46cv   1/1     Running   0          10m
+PS C:\Windows\system32> kubectl exec -it mongodep-799bb65b8-srtgw /bin/bash
+error: exec [POD] [COMMAND] is not supported anymore. Use exec [POD] -- [COMMAND] instead
+See 'kubectl exec -h' for help and examples
+PS C:\Windows\system32> kubectl exec -h
+Execute a command in a container.
+
+Examples:
+  # Get output from running the 'date' command from pod mypod, using the first container by default
+  kubectl exec mypod -- date
+
+  # Get output from running the 'date' command in ruby-container from pod mypod
+  kubectl exec mypod -c ruby-container -- date
+
+  # Switch to raw terminal mode; sends stdin to 'bash' in ruby-container from pod mypod
+  # and sends stdout/stderr from 'bash' back to the client
+  kubectl exec mypod -c ruby-container -i -t -- bash -il
+
+  # List contents of /usr from the first container of pod mypod and sort by modification time
+  # If the command you want to execute in the pod has any flags in common (e.g. -i),
+  # you must use two dashes (--) to separate your command's flags/arguments
+  # Also note, do not surround your command and its flags/arguments with quotes
+  # unless that is how you would execute it normally (i.e., do ls -t /usr, not "ls -t /usr")
+  kubectl exec mypod -i -t -- ls -t /usr
+
+  # Get output from running 'date' command from the first pod of the deployment mydeployment, using the first container
+by default
+  kubectl exec deploy/mydeployment -- date
+
+  # Get output from running 'date' command from the first pod of the service myservice, using the first container by
+default
+  kubectl exec svc/myservice -- date
+
+Options:
+    -c, --container='':
+        Container name. If omitted, use the kubectl.kubernetes.io/default-container annotation for selecting the
+        container to be attached or the first container in the pod will be chosen
+
+    -f, --filename=[]:
+        to use to exec into the resource
+
+    --pod-running-timeout=1m0s:
+        The length of time (like 5s, 2m, or 3h, higher than zero) to wait until at least one pod is running
+
+    -q, --quiet=false:
+        Only print output from the remote session
+
+    -i, --stdin=false:
+        Pass stdin to the container
+
+    -t, --tty=false:
+        Stdin is a TTY
+
+Usage:
+  kubectl exec (POD | TYPE/NAME) [-c CONTAINER] [flags] -- COMMAND [args...] [options]
+
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+PS C:\Windows\system32> kubectl exec --it mongodep-799bb65b8-srtgw /bin/bash
+error: unknown flag: --it
+See 'kubectl exec --help' for usage.
+PS C:\Windows\system32> kubectl get pod
+NAME                        READY   STATUS    RESTARTS   AGE
+mongodep-799bb65b8-srtgw    1/1     Running   0          6m52s
+nginxdep-6c459cbc6d-m46cv   1/1     Running   0          13m
+PS C:\Windows\system32> kubectl exec -it mongodep-799bb65b8-srtgw /bin/bash
+error: exec [POD] [COMMAND] is not supported anymore. Use exec [POD] -- [COMMAND] instead
+See 'kubectl exec -h' for help and examples
+PS C:\Windows\system32> kubectl exec -h
+Execute a command in a container.
+
+Examples:
+  # Get output from running the 'date' command from pod mypod, using the first container by default
+  kubectl exec mypod -- date
+
+  # Get output from running the 'date' command in ruby-container from pod mypod
+  kubectl exec mypod -c ruby-container -- date
+
+  # Switch to raw terminal mode; sends stdin to 'bash' in ruby-container from pod mypod
+  # and sends stdout/stderr from 'bash' back to the client
+  kubectl exec mypod -c ruby-container -i -t -- bash -il
+
+  # List contents of /usr from the first container of pod mypod and sort by modification time
+  # If the command you want to execute in the pod has any flags in common (e.g. -i),
+  # you must use two dashes (--) to separate your command's flags/arguments
+  # Also note, do not surround your command and its flags/arguments with quotes
+  # unless that is how you would execute it normally (i.e., do ls -t /usr, not "ls -t /usr")
+  kubectl exec mypod -i -t -- ls -t /usr
+
+  # Get output from running 'date' command from the first pod of the deployment mydeployment, using the first container
+by default
+  kubectl exec deploy/mydeployment -- date
+
+  # Get output from running 'date' command from the first pod of the service myservice, using the first container by
+default
+  kubectl exec svc/myservice -- date
+
+Options:
+    -c, --container='':
+        Container name. If omitted, use the kubectl.kubernetes.io/default-container annotation for selecting the
+        container to be attached or the first container in the pod will be chosen
+
+    -f, --filename=[]:
+        to use to exec into the resource
+
+    --pod-running-timeout=1m0s:
+        The length of time (like 5s, 2m, or 3h, higher than zero) to wait until at least one pod is running
+
+    -q, --quiet=false:
+        Only print output from the remote session
+
+    -i, --stdin=false:
+        Pass stdin to the container
+
+    -t, --tty=false:
+        Stdin is a TTY
+
+Usage:
+  kubectl exec (POD | TYPE/NAME) [-c CONTAINER] [flags] -- COMMAND [args...] [options]
+
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+PS C:\Windows\system32> kubectl exec -it mongodep-799bb65b8-srtgw --/bin/bash
+error: unknown flag: --/bin/bash
+See 'kubectl exec --help' for usage.
+PS C:\Windows\system32> kubectl exec -it mongodep-799bb65b8-srtgw -- /bin/bash
+root@mongodep-799bb65b8-srtgw:/# ls
+bin  boot  data  dev  docker-entrypoint-initdb.d  etc  home  js-yaml.js  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+root@mongodep-799bb65b8-srtgw:/# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+overlay          17G  2.2G   14G  14% /
+tmpfs            64M     0   64M   0% /dev
+shm              64M     0   64M   0% /dev/shm
+/dev/sda1        17G  2.2G   14G  14% /etc/hosts
+tmpfs           2.1G   12K  2.1G   1% /run/secrets/kubernetes.io/serviceaccount
+tmpfs           1.1G     0  1.1G   0% /proc/asound
+tmpfs           1.1G     0  1.1G   0% /proc/acpi
+tmpfs           1.1G     0  1.1G   0% /proc/scsi
+tmpfs           1.1G     0  1.1G   0% /sys/firmware
+root@mongodep-799bb65b8-srtgw:/# exit
+exit
+PS C:\Windows\system32> kubectl delete deployment mongodep
+deployment.apps "mongodep" deleted
+PS C:\Windows\system32> kubectl get deployment
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+nginxdep   1/1     1            1           20m
+PS C:\Windows\system32> kubectl get pod
+NAME                        READY   STATUS    RESTARTS   AGE
+nginxdep-6c459cbc6d-m46cv   1/1     Running   0          21m
+PS C:\Windows\system32> kubectl get replicaset
+NAME                  DESIRED   CURRENT   READY   AGE
+nginxdep-6c459cbc6d   1         1         1       21m
+PS C:\Windows\system32> kubectl delete deployment nginxdep
+deployment.apps "nginxdep" deleted
+PS C:\Windows\system32> kubectl get deployment
+No resources found in default namespace.
+PS C:\Windows\system32> kubectl get pod
+No resources found in default namespace.
+PS C:\Windows\system32> kubectl get replicaset
+No resources found in default namespace.
+PS C:\Windows\system32> kubectl
+kubectl controls the Kubernetes cluster manager.
+
+ Find more information at: https://kubernetes.io/docs/reference/kubectl/
+
+Basic Commands (Beginner):
+  create          Create a resource from a file or from stdin
+  expose          Take a replication controller, service, deployment or pod and expose it as a new Kubernetes service
+  run             Run a particular image on the cluster
+  set             Set specific features on objects
+
+Basic Commands (Intermediate):
+  explain         Get documentation for a resource
+  get             Display one or many resources
+  edit            Edit a resource on the server
+  delete          Delete resources by file names, stdin, resources and names, or by resources and label selector
+
+Deploy Commands:
+  rollout         Manage the rollout of a resource
+  scale           Set a new size for a deployment, replica set, or replication controller
+  autoscale       Auto-scale a deployment, replica set, stateful set, or replication controller
+
+Cluster Management Commands:
+  certificate     Modify certificate resources
+  cluster-info    Display cluster information
+  top             Display resource (CPU/memory) usage
+  cordon          Mark node as unschedulable
+  uncordon        Mark node as schedulable
+  drain           Drain node in preparation for maintenance
+  taint           Update the taints on one or more nodes
+
+Troubleshooting and Debugging Commands:
+  describe        Show details of a specific resource or group of resources
+  logs            Print the logs for a container in a pod
+  attach          Attach to a running container
+  exec            Execute a command in a container
+  port-forward    Forward one or more local ports to a pod
+  proxy           Run a proxy to the Kubernetes API server
+  cp              Copy files and directories to and from containers
+  auth            Inspect authorization
+  debug           Create debugging sessions for troubleshooting workloads and nodes
+  events          List events
+
+Advanced Commands:
+  diff            Diff the live version against a would-be applied version
+  apply           Apply a configuration to a resource by file name or stdin
+  patch           Update fields of a resource
+  replace         Replace a resource by file name or stdin
+  wait            Experimental: Wait for a specific condition on one or many resources
+  kustomize       Build a kustomization target from a directory or URL
+
+Settings Commands:
+  label           Update the labels on a resource
+  annotate        Update the annotations on a resource
+  completion      Output shell completion code for the specified shell (bash, zsh, fish, or powershell)
+
+Subcommands provided by plugins:
+  convert.exe   The command convert.exe is a plugin installed by the user
+
+Other Commands:
+  api-resources   Print the supported API resources on the server
+  api-versions    Print the supported API versions on the server, in the form of "group/version"
+  config          Modify kubeconfig files
+  plugin          Provides utilities for interacting with plugins
+  version         Print the client and server version information
+
+Usage:
+  kubectl [flags] [options]
+
+Use "kubectl <command> --help" for more information about a given command.
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+PS C:\Windows\system32> D:
+PS D:\> kubectl
+kubectl controls the Kubernetes cluster manager.
+
+ Find more information at: https://kubernetes.io/docs/reference/kubectl/
+
+Basic Commands (Beginner):
+  create          Create a resource from a file or from stdin
+  expose          Take a replication controller, service, deployment or pod and expose it as a new Kubernetes service
+  run             Run a particular image on the cluster
+  set             Set specific features on objects
+
+Basic Commands (Intermediate):
+  explain         Get documentation for a resource
+  get             Display one or many resources
+  edit            Edit a resource on the server
+  delete          Delete resources by file names, stdin, resources and names, or by resources and label selector
+
+Deploy Commands:
+  rollout         Manage the rollout of a resource
+  scale           Set a new size for a deployment, replica set, or replication controller
+  autoscale       Auto-scale a deployment, replica set, stateful set, or replication controller
+
+Cluster Management Commands:
+  certificate     Modify certificate resources
+  cluster-info    Display cluster information
+  top             Display resource (CPU/memory) usage
+  cordon          Mark node as unschedulable
+  uncordon        Mark node as schedulable
+  drain           Drain node in preparation for maintenance
+  taint           Update the taints on one or more nodes
+
+Troubleshooting and Debugging Commands:
+  describe        Show details of a specific resource or group of resources
+  logs            Print the logs for a container in a pod
+  attach          Attach to a running container
+  exec            Execute a command in a container
+  port-forward    Forward one or more local ports to a pod
+  proxy           Run a proxy to the Kubernetes API server
+  cp              Copy files and directories to and from containers
+  auth            Inspect authorization
+  debug           Create debugging sessions for troubleshooting workloads and nodes
+  events          List events
+
+Advanced Commands:
+  diff            Diff the live version against a would-be applied version
+  apply           Apply a configuration to a resource by file name or stdin
+  patch           Update fields of a resource
+  replace         Replace a resource by file name or stdin
+  wait            Experimental: Wait for a specific condition on one or many resources
+  kustomize       Build a kustomization target from a directory or URL
+
+Settings Commands:
+  label           Update the labels on a resource
+  annotate        Update the annotations on a resource
+  completion      Output shell completion code for the specified shell (bash, zsh, fish, or powershell)
+
+Subcommands provided by plugins:
+  convert.exe   The command convert.exe is a plugin installed by the user
+
+Other Commands:
+  api-resources   Print the supported API resources on the server
+  api-versions    Print the supported API versions on the server, in the form of "group/version"
+  config          Modify kubeconfig files
+  plugin          Provides utilities for interacting with plugins
+  version         Print the client and server version information
+
+Usage:
+  kubectl [flags] [options]
+
+Use "kubectl <command> --help" for more information about a given command.
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+PS D:\> minikube
+minikube provisions and manages local Kubernetes clusters optimized for development workflows.
+
+Basic Commands:
+  start            Starts a local Kubernetes cluster
+  status           Gets the status of a local Kubernetes cluster
+  stop             Stops a running local Kubernetes cluster
+  delete           Deletes a local Kubernetes cluster
+  dashboard        Access the Kubernetes dashboard running within the minikube cluster
+  pause            pause Kubernetes
+  unpause          unpause Kubernetes
+
+Images Commands:
+  docker-env       Provides instructions to point your terminal's docker-cli to the Docker Engine inside minikube.
+(Useful for building docker images directly inside minikube)
+  podman-env       Configure environment to use minikube's Podman service
+  cache            Manage cache for images
+  image            Manage images
+
+Configuration and Management Commands:
+  addons           Enable or disable a minikube addon
+  config           Modify persistent configuration values
+  profile          Get or list the current profiles (clusters)
+  update-context   Update kubeconfig in case of an IP or port change
+
+Networking and Connectivity Commands:
+  service          Returns a URL to connect to a service
+  tunnel           Connect to LoadBalancer services
+
+Advanced Commands:
+  mount            Mounts the specified directory into minikube
+  ssh              Log into the minikube environment (for debugging)
+  kubectl          Run a kubectl binary matching the cluster version
+  node             Add, remove, or list additional nodes
+  cp               Copy the specified file into minikube
+
+Troubleshooting Commands:
+  ssh-key          Retrieve the ssh identity key path of the specified node
+  ssh-host         Retrieve the ssh host key of the specified node
+  ip               Retrieves the IP address of the specified node
+  logs             Returns logs to debug a local Kubernetes cluster
+  update-check     Print current and latest version number
+  version          Print the version of minikube
+  options          Show a list of global command-line options (applies to all commands).
+
+Other Commands:
+  completion       Generate command completion for a shell
+  license          Outputs the licenses of dependencies to a directory
+
+Use "minikube <command> --help" for more information about a given command.
+PS D:\> kubectl apply -f nginx_depl_config.yml
+error: the path "nginx_depl_config.yml" does not exist
+PS D:\> kubectl apply -f nginx_depl_config.yml
+error: the path "nginx_depl_config.yml" does not exist
+PS D:\> kubectl apply -f nginx_depl_config.yml
+error: the path "nginx_depl_config.yml" does not exist
+PS D:\> minikube <command> --help
+At line:1 char:10
++ minikube <command> --help
++          ~
+The '<' operator is reserved for future use.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : RedirectionNotSupported
+
+PS D:\> minikube kubectl apply -f nginx_depl_config.yml --help
+Error: unknown shorthand flag: 'f' in -f
+See 'minikube kubectl --help' for usage.
+PS D:\> kubectl apply -f nginx_depl_config.yml
+error: the path "nginx_depl_config.yml" does not exist
