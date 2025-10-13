@@ -1,843 +1,316 @@
------------------------------------------------------------------------------------------------- Practical 1 -----------------------------------------------------------------------------------------------------------------
-
-CREATE DATABASE dab1;
-CREATE DATABASE dab2;
-
-USE dab1;
-
-CREATE TABLE employee (
-  empid INT PRIMARY KEY NOT NULL,
-  ename VARCHAR(20) NOT NULL,
-  address VARCHAR(20) NOT NULL,
-  designation VARCHAR(20) NOT NULL,
-  salary INT NOT NULL
-);
-
-CREATE TABLE worker (
-  empid INT PRIMARY KEY NOT NULL,
-  ename VARCHAR(20) NOT NULL,
-  address VARCHAR(20) NOT NULL,
-  designation VARCHAR(20) NOT NULL,
-  salary INT NOT NULL
-);
-
-INSERT INTO employee VALUES 
-(102, 'Alex', 'Thane', 'GB', 3000),
-(103, 'Maria', 'Mumbai', 'HR', 3500),
-(104, 'John', 'Pune', 'IT', 12500),
-(105, 'Sara', 'Delhi', 'Finance', 4200),
-(106, 'David', 'Chennai', 'Marketing', 13900),
-(107, 'Nina', 'Bangalore', 'IT', 4100),
-(108, 'Tom', 'Kolkata', 'Operations', 3700),
-(109, 'Lucy', 'Hyderabad', 'HR', 3600),
-(110, 'Ryan', 'Jaipur', 'Finance', 14300),
-(111, 'Eva', 'Ahmedabad', 'Sales', 3800);
-
-USE dab2;
-
-CREATE TABLE officer (
-  empid INT PRIMARY KEY NOT NULL,
-  ename VARCHAR(20) NOT NULL,
-  address VARCHAR(20) NOT NULL,
-  designation VARCHAR(20) NOT NULL,
-  salary INT NOT NULL
-);
-
-USE dab1;
-
-DELIMITER $$
-
-CREATE TRIGGER t01
-AFTER INSERT ON employee
-FOR EACH ROW
-BEGIN
-  IF NEW.salary <= 10000 THEN
-    INSERT INTO worker VALUES (NEW.empid, NEW.ename, NEW.address, NEW.designation, NEW.salary);
-  ELSE
-    INSERT INTO dab2.officer VALUES (NEW.empid, NEW.ename, NEW.address, NEW.designation, NEW.salary);
-  END IF;
-END$$
-
-DELIMITER ;
-
--- To test the trigger:
-INSERT INTO employee VALUES (112, 'Karan', 'Nashik', 'Admin', 9000);
-INSERT INTO employee VALUES (113, 'Rita', 'Surat', 'Manager', 15000);
-
--- To view results:
-SELECT * FROM worker;
-SELECT * FROM employee;
-SELECT * FROM dab2.officer;
-
-
-Note: As it is run the code and when asked for output just run the last three commands by single selecting and executing
-
-
------------------------------------------------------------------------------------------------- Practical 2 -----------------------------------------------------------------------------------------------------------------
-
--- Create databases
-CREATE DATABASE d1;
-CREATE DATABASE d2;
-
--- Use d1
-USE d1;
-
--- Create patients table
-CREATE TABLE patients (
-  pid INT PRIMARY KEY NOT NULL,
-  pname VARCHAR(20) NOT NULL,
-  padd VARCHAR(20) NOT NULL,
-  phone BIGINT NOT NULL,
-  email VARCHAR(50) NOT NULL,
-  religion VARCHAR(20) NOT NULL,
-  bed INT NOT NULL,
-  ward INT NOT NULL,
-  doc INT NOT NULL,
-  serv VARCHAR(20) NOT NULL
-);
-
--- Create personal table
-CREATE TABLE personal (
-  pid INT PRIMARY KEY NOT NULL,
-  pname VARCHAR(20) NOT NULL,
-  padd VARCHAR(20) NOT NULL,
-  phone BIGINT NOT NULL,
-  email VARCHAR(50) NOT NULL,
-  religion VARCHAR(20) NOT NULL
-);
-
--- Switch to d2
-USE d2;
-
--- Create official table
-CREATE TABLE official (
-  pid INT PRIMARY KEY NOT NULL,
-  bed INT NOT NULL,
-  ward INT NOT NULL,
-  doc INT NOT NULL,
-  serv VARCHAR(20) NOT NULL
-);
-
--- Switch back to d1
-USE d1;
-
--- Drop trigger if it already exists (for re-runs)
-DROP TRIGGER IF EXISTS t01;
-
--- Create trigger to insert into both personal (d1) and official (d2)
-DELIMITER $$
-CREATE TRIGGER t01
-AFTER INSERT ON patients
-FOR EACH ROW
-BEGIN 
-  INSERT INTO d1.personal VALUES (NEW.pid, NEW.pname, NEW.padd, NEW.phone, NEW.email, NEW.religion);
-  INSERT INTO d2.official VALUES (NEW.pid, NEW.bed, NEW.ward, NEW.doc, NEW.serv);
-END$$
-DELIMITER ;
-
--- Insert patient records
-INSERT INTO patients VALUES
-(101, 'milton', 'mumbai', 87652, 'mil23ton@gmail.com', 'christian', 12, 23, 201, 'optic'),
-(102, 'noah', 'hyderabad', 98982, 'no_ah@gmail.com', 'muslim', 15, 22, 202, 'neuro'),
-(103, 'hannah', 'chennai', 82823, 'hannah@gmail.com', 'muslim', 10, 23, 201, 'optic'),
-(104, 'james', 'mumbai', 93902, 'james@gmail.com', 'atheist', 11, 23, 203, 'ortho'),
-(105, 'fred', 'delhi', 82422, 'fred@gmail.com', 'christian', 12, 23, 204, 'dentist'),
-(106, 'samira', 'mumbai', 87652, 'sam@gmail.com', 'muslim', 18, 23, 205, 'pedriatic'),
-(107, 'seema', 'delhi', 83352, 'seema@gmail.com', 'hindu', 16, 23, 203, 'ortho'),
-(108, 'jasmine', 'chandigarh', 86252, 'jasmine@gmail.com', 'sikh', 12, 23, 205, 'pedriatic'),
-(109, 'shyam', 'calcutta', 24252, 'shyam@gmail.com', 'hindu', 13, 23, 202, 'neuro'),
-(110, 'zahid', 'mumbai', 82212, 'zahid@gmail.com', 'muslim', 32, 23, 204, 'dentist');
-
-
--- Display all patient details
-SELECT * FROM d1.patients;
-
--- Display all personal details of patient no = 105
-SELECT * FROM d1.personal WHERE pid = 105;
-
--- Display all official details
-SELECT * FROM d2.official;
-
--- Display official details of patient no = 106
-SELECT * FROM d2.official WHERE pid = 106;
-
--- Select Patient Name, Address, BedNo, Ward, Service where doctor no is given
-SELECT p.pname, p.padd, o.bed, o.ward, o.serv 
-FROM d1.personal p
-JOIN d2.official o ON p.pid = o.pid
-WHERE o.doc IS NOT NULL;
-
--- Select Patient Name, Address, BedNo, Ward, Service for given service ('neuro')
-SELECT p.pname, p.padd, o.bed, o.ward, o.serv 
-FROM d1.personal p
-JOIN d2.official o ON p.pid = o.pid
-WHERE o.serv = 'neuro';
-
--- Display the count of total patients
-SELECT COUNT(*) AS total_patients FROM d1.patients;
-
--- Select Patient Name, Address, BedNo, Ward, Service for given address ('delhi')
-SELECT p.pname, p.padd, o.bed, o.ward, o.serv 
-FROM d1.personal p
-JOIN d2.official o ON p.pid = o.pid
-WHERE p.padd = 'delhi';
-
------------------------------------------------------------------------------------------------- Practical 3 -----------------------------------------------------------------------------------------------------------------
-
-create database p3d1;
-create database p3d2;
-
-use p3d1;
-create table reservation(
-bkid int primary key not null,
-custname varchar(50) not null,
-dest varchar(50) not null,
-class varchar(50) not null,
-cost int not null);
-
-use p3d2;
-create table reserv_bk as select * from p3d1.reservation;
-
-select * from p3d1.reservation;
-select * from p3d2.reserv_bk;
-
-use p3d1;
-delimiter $$
-create trigger ct
-after insert on reservation for each row
-begin
-insert into p3d2.reserv_bk values(new.bkid, new.custname, new.dest, new.class, new.cost);
-end$$
-
-delimiter $$
-create trigger ut
-after update on reservation for each row
-begin
-update p3d2.reserv_bk
-set
-custname=new.custname,
-dest=new.dest,
-class=new.class,
-cost=new.cost;
-end$$
-
-delimiter $$
-create trigger dt
-after delete on reservation for each row
-begin
-delete from reservation where bkid=old.bkid;
-end$$
-
-insert into reservation values 
-(201, 'jennifer', 'mumbai', 'first', 4000),
-(202, 'dylan', 'chennai', 'second', 6000),
-(203, 'liam', 'mumbai', 'first', 7000),
-(204, 'bob', 'delhi', 'second', 6000),
-(205, 'frank', 'mumbai', 'first', 8000),
-(206, 'rene', 'calcutta', 'first', 7000),
-(207, 'victor', 'mumbai', 'second', 4000),
-(208, 'caleb', 'delhi', 'first', 9000),
-(209, 'tiffany', 'delhi', 'second', 4000),
-(210, 'sandra', 'calcutta', 'second', 3000);
-
-select * from reservation;
-select * from p3d2.reserv_bk;
-
--- Display records of those customers, who will land at Mumbai. 
-select * from reservation where dest='mumbai';
-select * from p3d2.reserv_bk where dest='mumbai';
-
--- Display records of those customers, who travel from first class. 
-select * from reservation where class='first';
-select * from p3d2.reserv_bk where class='first';
-
--- Display the details where the cost is in the range of 2500 to 5000.
-select * from reservation where cost between 2500 and 5000;
-select * from p3d2.reserv_bk where cost between 2500 and 5000;
-
--- Display total fares of the tickets. 
-select sum(cost) from reservation;
-select sum(cost) from p3d2.reserv_bk;
-
--- Display total no. of tickets booked under second class. 
-select count(class) from reservation where class='second';
-select count(class) from p3d2.reserv_bk where class='second';
-
-
------------------------------------------------------------------------------------------------- Practical 4 (live) -----------------------------------------------------------------------------------------------------------------
-
--- Address Type
-CREATE OR REPLACE TYPE ADDRESS_TYPE1 AS OBJECT (
-        PINCODE NUMBER,
-        STREET  VARCHAR2(50),
-        CITY    VARCHAR2(30),
-        STATE   VARCHAR2(30),
-        NO      NUMBER
-);
-/
-
--- Branch Type
-CREATE OR REPLACE TYPE BRANCH_TYPE AS OBJECT (
-        ADDRESS ADDRESS_TYPE1,
-        PHONE1  NUMBER,
-        PHONE2  NUMBER
-);
-/
-
--- Author Type
-CREATE OR REPLACE TYPE AUTHOR_TYPE AS OBJECT (
-        NAME    VARCHAR2(50),
-        ADDRESS ADDRESS_TYPE1
-);
-/
-
--- Branch Table Type
-CREATE OR REPLACE TYPE BRANCH_TABLE_TYPE AS
-    TABLE OF BRANCH_TYPE;
-/
-
--- Publisher Type
-CREATE OR REPLACE TYPE PUBLISHER_TYPE AS OBJECT (
-        NAME     VARCHAR2(50),
-        ADDRESS  ADDRESS_TYPE1,
-        BRANCHES BRANCH_TABLE_TYPE
-);
-/
-
--- Author List Type (VARRAY of REF Author)
-CREATE OR REPLACE TYPE AUTHOR_LIST_TYPE AS
-    VARRAY(10) OF REF AUTHOR_TYPE;
-/
-
--- create tables
-
-CREATE TABLE AUTHORS OF AUTHOR_TYPE;
-
-CREATE TABLE PUBLISHERS OF PUBLISHER_TYPE
-NESTED TABLE BRANCHES STORE AS BRANCH_TABLE;
-
-CREATE TABLE BOOKS (
-    TITLE        VARCHAR2(50),
-    YR           DATE,
-    PUBLISHED_BY REF PUBLISHER_TYPE,
-    AUTHORS      AUTHOR_LIST_TYPE
-);
-
--- insert values into authors
-INSERT INTO AUTHORS VALUES ( 'Sangol',
-                             ADDRESS_TYPE1(700, 'Dalal Street', 'Mumbai', 'Maharashtra', 1) );
-
-INSERT INTO AUTHORS VALUES ( 'A.K.Mehta',
-                             ADDRESS_TYPE1(7006, 'Dalal Street', 'Mumbai', 'Maharashtra', 1005) );
-
-INSERT INTO AUTHORS VALUES ( 'Ramakrishna',
-                             ADDRESS_TYPE1(8002, 'Thakur Street', 'Pune', 'Maharashtra', 1006) );
-
-INSERT INTO AUTHORS VALUES ( 'S.M.Khan',
-                             ADDRESS_TYPE1(9012, 'Link Road', 'Nashik', 'Maharashtra', 10) );
-
-
--- insert into PUBLISHERS
-
-INSERT INTO PUBLISHERS VALUES ('Raj',
-    ADDRESS_TYPE1(4002,'Park Street','Mumbai','Maharashtra',3),
-    BRANCH_TABLE_TYPE(
-        BRANCH_TYPE(ADDRESS_TYPE1(5002,'Pali Street','Mumbai','Maharashtra',3),2340,6896)
-    )
-);
-
-INSERT INTO PUBLISHERS VALUES ('Krish',
-    ADDRESS_TYPE1(4002,'Lovely Street','Mumbai','Maharashtra',9),
-    BRANCH_TABLE_TYPE(
-        BRANCH_TYPE(ADDRESS_TYPE1(9658,'King Street','Mumbai','Maharashtra',1),2148,3456),
-        BRANCH_TYPE(ADDRESS_TYPE1(9745,'Queen Street','Pune','Maharashtra',2),2789,3457)
-    )
-);
-/
-
--- insert into BOOKS
-
--- Book with 1 author
-INSERT INTO BOOKS
-SELECT 'IP', TO_DATE('28-MAY-1983','DD-MON-YYYY'), REF(P), AUTHOR_LIST_TYPE(REF(A))
-FROM PUBLISHERS P, AUTHORS A
-WHERE P.NAME='Raj' AND A.NAME='Sangol';
-
--- Book with 2 authors
-INSERT INTO BOOKS
-SELECT 'Database Concepts', TO_DATE('15-JUN-2001','DD-MON-YYYY'), REF(P), AUTHOR_LIST_TYPE(REF(A1), REF(A2))
-FROM PUBLISHERS P, AUTHORS A1, AUTHORS A2
-WHERE P.NAME='Krish' AND A1.NAME='A.K.Mehta' AND A2.NAME='Ramakrishna';
-/
-
-
--- fire queries
--- 1. List all book titles
-SELECT TITLE FROM BOOKS;
-
--- 2. List title and year
-SELECT TITLE, YR FROM BOOKS;
-
--- 3. Title, Year, Publisher
-SELECT B.TITLE, B.YR, DEREF(B.PUBLISHED_BY).NAME AS PUBLISHER_NAME
-FROM BOOKS B;
-
--- 4. Authors and publishers in same state
-select A.NAME FROM AUTHORS A,PUBLISHERS P WHERE A.ADDRESS.STATE = P.ADDRESS.state;
-
--- 5. Books with 2 or more authors
-SELECT TITLE FROM BOOKS B
-WHERE 2 >=(SELECT COUNT(*)FROM TABLE(B.AUTHORS));
-/
-
--- 6. Publisher(s) with most branches
-SELECT
-    P.NAME
-FROM
-    PUBLISHERS P,
-    TABLE ( P.BRANCHES )
-GROUP BY
-    P.NAME
-HAVING
-    COUNT(*) >= ALL (
-        SELECT
-            COUNT(*)
-        FROM
-            PUBLISHERS P,
-            TABLE ( P.BRANCHES )
-        GROUP BY
-            NAME
-    );
-
-SELECT
-    TITLE
-FROM
-    AUTHORS             A,
-    BOOKS               B,
-    TABLE ( B.AUTHORS ) V
-WHERE
-    V.COLUMN_VALUE = ref(A)
-GROUP BY
-    TITLE
-HAVING
-    COUNT(*) > 1;
-
-#-----------------------------------------------------------------------------------------Practical 5 (live) ---------------------------------------------------------------------------------------------------------------------------
-
-
--- 1️⃣  CREATE TABLE
----------------------------------------------------------
-CREATE TABLE EMP_XML (
-    DEPT_ID       NUMBER(4),
-    EMPLOYEE_SPEC XMLTYPE
-);
-
----------------------------------------------------------
--- 2️⃣  INSERT 10 RECORDS INTO EMP_XML
----------------------------------------------------------
-
-INSERT INTO EMP_XML VALUES (
-  1,
-  XMLTYPE('<emp id="1">
-    <name>Jim</name>
-    <email>jim@gmail.com</email>
-    <acc_no>1234</acc_no>
-    <doj>12/12/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>')
-);
-
-INSERT INTO EMP_XML VALUES (
-  1,
-  XMLTYPE('<emp id="2">
-    <name>Fred</name>
-    <email>fred@gmail.com</email>
-    <acc_no>4321</acc_no>
-    <doj>14/01/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>')
-);
-
-INSERT INTO EMP_XML VALUES (
-  1,
-  XMLTYPE('<emp id="3">
-    <name>Deffy</name>
-    <email>deffy@gmail.com</email>
-    <acc_no>1426</acc_no>
-    <doj>13/06/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>')
-);
-
-INSERT INTO EMP_XML VALUES (
-  1,
-  XMLTYPE('<emp id="4">
-    <name>Ben</name>
-    <email>ben@gmail.com</email>
-    <acc_no>1712</acc_no>
-    <doj>17/06/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>')
-);
-
-INSERT INTO EMP_XML VALUES (
-  1,
-  XMLTYPE('<emp id="5">
-    <name>Fenny</name>
-    <email>fen@gmail.com</email>
-    <acc_no>1812</acc_no>
-    <doj>10/11/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>')
-);
-
-INSERT INTO EMP_XML VALUES (
-  2,
-  XMLTYPE('<emp id="6">
-    <name>Foggy</name>
-    <email>fog@gmail.com</email>
-    <acc_no>1845</acc_no>
-    <doj>24/08/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>')
-);
-
-INSERT INTO EMP_XML VALUES (
-  1,
-  XMLTYPE('<emp id="7">
-    <name>Selvy</name>
-    <email>selvy@gmail.com</email>
-    <acc_no>1217</acc_no>
-    <doj>07/02/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>')
-);
-
-INSERT INTO EMP_XML VALUES (
-  1,
-  XMLTYPE('<emp id="8">
-    <name>Tom</name>
-    <email>tom@gmail.com</email>
-    <acc_no>1925</acc_no>
-    <doj>29/02/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>')
-);
-
-INSERT INTO EMP_XML VALUES (
-  2,
-  XMLTYPE('<emp id="9">
-    <name>Liza</name>
-    <email>liza@gmail.com</email>
-    <acc_no>1755</acc_no>
-    <doj>20/07/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>')
-);
-
-INSERT INTO EMP_XML VALUES (
-  2,
-  XMLTYPE('<emp id="10">
-    <name>Chris</name>
-    <email>chris@gmail.com</email>
-    <acc_no>1988</acc_no>
-    <doj>09/09/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>')
-);
-
----------------------------------------------------------
--- 3️⃣  DISPLAY ALL RECORDS (AS RAW XML)
----------------------------------------------------------
-SELECT
-    DEPT_ID,
-    E.EMPLOYEE_SPEC.GETCLOBVAL() AS EMP_SPEC_XML
-FROM
-    EMP_XML E;
-
----------------------------------------------------------
--- 4️⃣  RETRIEVE NAMES OF EMPLOYEES
----------------------------------------------------------
-SELECT
-    E.EMPLOYEE_SPEC.EXTRACT('//name/text()').GETSTRINGVAL() AS EMP_NAME
-FROM
-    EMP_XML E;
-
----------------------------------------------------------
--- 5️⃣  RETRIEVE ACCOUNT NUMBERS OF EMPLOYEES
----------------------------------------------------------
-SELECT
-    E.EMPLOYEE_SPEC.EXTRACT('//acc_no/text()').GETSTRINGVAL() AS ACC_NO
-FROM
-    EMP_XML E;
-
----------------------------------------------------------
--- 6️⃣  RETRIEVE NAMES, ACC_NO, AND EMAIL OF EMPLOYEES
----------------------------------------------------------
-SELECT
-    E.EMPLOYEE_SPEC.EXTRACT('//name/text()').GETSTRINGVAL() AS NAME,
-    E.EMPLOYEE_SPEC.EXTRACT('//acc_no/text()').GETSTRINGVAL() AS ACC_NO,
-    E.EMPLOYEE_SPEC.EXTRACT('//email/text()').GETSTRINGVAL() AS EMAIL
-FROM
-    EMP_XML E;
-
----------------------------------------------------------
--- 7️⃣  UPDATE THE 3rd RECORD (Deffy) AND DISPLAY UPDATED NAME
----------------------------------------------------------
-UPDATE EMP_XML
-SET EMPLOYEE_SPEC = XMLTYPE(
-  '<emp id="3">
-    <name>Deffy Updated</name>
-    <email>deffy@gmail.com</email>
-    <acc_no>1426</acc_no>
-    <doj>13/06/2018</doj>
-    <mgr_mail>rox_mgr@hotmail.com</mgr_mail>
-  </emp>'
-)
-WHERE EMPLOYEE_SPEC.EXTRACT('//acc_no/text()').GETSTRINGVAL() = '1426';
--- Display updated employee name
-SELECT
-    E.EMPLOYEE_SPEC.EXTRACT('//name/text()').GETSTRINGVAL() AS UPDATED_NAME
-FROM
-    EMP_XML E
-WHERE
-    E.EMPLOYEE_SPEC.EXTRACT('//acc_no/text()').GETSTRINGVAL() = '1426';
-
----------------------------------------------------------
--- 8️⃣  DELETE THE 4th RECORD (Ben)
----------------------------------------------------------
-DELETE FROM EMP_XML E
-WHERE E.EMPLOYEE_SPEC.EXTRACT('//acc_no/text()').GETSTRINGVAL() = '1712';
----------------------------------------------------------
--- 9️⃣  DISPLAY REMAINING EMPLOYEE NAMES AFTER DELETION
----------------------------------------------------------
-SELECT
-    E.EMPLOYEE_SPEC.EXTRACT('//name/text()').GETSTRINGVAL() AS NAME
-FROM
-    EMP_XML E;
-
------------------------------------------------------------------------------------------ Practical 6 ----------------------------------------------------------------------------------------------------------------------------
-
-create database p_6;
-use p_6;
-create table employee (eno int primary key not null,
-ename varchar(30) not null,
-hrs int not null,
-pn int);
-
-create table project (pname varchar (30) not null, pn int not null primary key, thrs int);
-insert into project values ('java', 1, 0);
-insert into project values ('python', 2, 0);
-insert into project values ('ruby', 3, 0);
-insert into project values ('swift', 4, 0);
-insert into project values ('sql', 5, 0);
-
-select * from project;
-
-delimiter $$
-create trigger total_hours
-after insert on employee
-for each row
-begin
-if new.pn is not null
-then
-update project
-set
-thrs=thrs+new.hrs
-where pn=new.pn;
-end if;
-end$$
-
-insert into employee values (001, 'henry', 3,3);
-insert into employee values (002, 'alec', 4,2);
-insert into employee values (003, 'wiley', 3,4);
-insert into employee values (004, 'dan', 5,5);
-insert into employee values (005, 'sarah', 4,3);
-
-
-delimiter $$
-create trigger total_hours1
-after update on employee
-for each row
-begin
-if new.pn is not null
-then
-update project
-set
-thrs=thrs+new.hrs-old.hrs
-where pn=new.pn;
-end if;
-end$$
-update employee set hrs=10 where eno=2;
-
-select * from employee;
-
------------------------------------------------------------------------------------------ Practical 7 (live) ----------------------------------------------------------------------------------------------------------------------------
-
-
-CREATE TABLE EMPLOYEES (
-    ACCNO     INT PRIMARY KEY,
-    ENAME     VARCHAR(30),
-    RECRUDATE TIMESTAMP(0),
-    RETDATE   TIMESTAMP(0)
-);
-insert into employees values
-(1, 'gina', to_timestamp ( '14 - 10 - 2010 13 :05 :45 ', ' DD - MM - YYYY HH24 :MI :SS '), to_timestamp(' 15 - 10 - 2020 09 :15 :12 ', '
-DD - MM - YYYY HH24 :MI :SS '));
-insert into employees values
-(2, ' TINA ', to_timestamp (' 14 - 11 - 2010 13 :05 :45 ', ' DD - MM - YYYY HH24 :MI :SS '), to_timestamp(' 25 - 02 - 2020 09 :15 :12
-', ' DD - MM - YYYY HH24 :MI :SS '));
-select * from employees;
-
---01) Find all the employees who have joined on 25-02-2020 09:15:12
-select * from employees where recrudate=to_timestamp('14-11-2010 13:05:45', 'dd-mm-yyyy hh24:mi:ss');
-
---Q2) Find all the employees who will retire on 15-10-2020 09:15:12
-select * from employees where retdate=to_timestamp('15-10-2020 09:15:12', 'dd-mm-yyyy hh24:mi:ss');
-
---Create a table Shares, which stores the name of a company, number of shares and price per share and transaction time. Insert 10 records and fire the following queries.
---✓ Find the names of all companies whose shares price is more than Rs 100/- at 10-02- 2002 09:05:01.
---✓ Find the name of all companies with Highest share price at 10-02-2002 09:05:01.
-
-
-create table shares (name varchar(20), no int, price int, transtime timestamp(0));
-insert into shares values ('horizon ltd', 50, 112, to_timestamp('10-02-2012 09:05:45', 'dd:mm: yyyy hh24:mi:ss'));
-insert into shares values ('Infosys Itd', 45, 132, to_timestamp('01-03-2011 09:05:45', 'dd:mm: yyyy hh24:mi:ss'));
-insert into shares values ('hindtech ltd', 45, 92, to_timestamp('01-03-2011 09:05:45', 'dd:mm: yyyy hh24:mi:ss'));
-insert into shares values ('infotech ltd', 51, 102, to_timestamp('10-02-2011 09:05:45', 'dd:mm:yyyy hh24:mi:ss'));
-
-select * from shares;
-
-select name from shares where (no * price)>100 and transtime=to_timestamp('01-03-2011 09:05:45', 'dd:mm:yyyy hh24:mi:ss');
-
---2Find the names of all companies with highest share price at 10-02-2002 09:05:01
-select name from shares where price=(select max(price) from shares where transtime=to_timestamp('01-03-2011 09:05:45', 'dd:mm: yyyy hh24:mi:ss'));
-
------------------------------------------------------------------------------------------ Practical 8 (live) ----------------------------------------------------------------------------------------------------------------------------
-
--- 🟢 1 CREATE TABLE EMPLOYEE
----------------------------------------------------------
-CREATE TABLE EMPLOYEE (
-    EMPLOYEE_ID NUMBER(10),
-    FIRSTNAME   VARCHAR2(20),
-    LASTNAME    VARCHAR2(20),
-    EMAIL       VARCHAR2(25),
-    HIRE_DATE   DATE,
-    JOB_ID      VARCHAR2(20),
-    SALARY      NUMBER(9),
-    RESUME      CLOB,
-    PICTURE     BLOB
-);
-
----------------------------------------------------------
--- 🟢 2. INSERT INTO EMPLOYEE
----------------------------------------------------------
-INSERT INTO EMPLOYEE VALUES (
-    1,
-    'Pratik',
-    'Doshi',
-    'pratikdoshi@yahoo.com',
-    TO_DATE('1 Jul 2005', 'DD Mon YYYY'),
-    'Project Manager',
-    12000,
-    EMPTY_CLOB(),
-    NULL
-);
-
----------------------------------------------------------
--- 🟢 3. DISPLAY RECORDS
----------------------------------------------------------
-SELECT * FROM EMPLOYEE;
-
----------------------------------------------------------
--- 🟢 4. UPDATE EMPLOYEE (add initial CLOB + BLOB values)
----------------------------------------------------------
-UPDATE EMPLOYEE
-SET 
-    RESUME = 'Date of Birth: 26 June 2003',
-    PICTURE = EMPTY_BLOB()
-WHERE 
-    EMPLOYEE_ID = 1;
-
----------------------------------------------------------
--- 🟢 5. DISPLAY UPDATED RECORD
----------------------------------------------------------
-SELECT 
-    EMPLOYEE_ID,
-    FIRSTNAME,
-    LASTNAME,
-    RESUME
-FROM 
-    EMPLOYEE;
-
----------------------------------------------------------
--- 🟢 6. APPEND TEXT TO CLOB USING PL/SQL BLOCK
----------------------------------------------------------
-DECLARE
-    lobloc  CLOB;
-    text    VARCHAR2(32767) := 'Resigned: 5 August 2006';
-    amount  NUMBER;
-    offset  NUMBER;
-BEGIN
-    -- Select CLOB locator for update
-    SELECT RESUME INTO lobloc
-    FROM EMPLOYEE
-    WHERE EMPLOYEE_ID = 1
-    FOR UPDATE;
-
-    -- Calculate current CLOB length and append new text
-    offset := DBMS_LOB.GETLENGTH(lobloc) + 2;
-    amount := LENGTH(text);
-
-    DBMS_LOB.WRITE(lobloc, amount, offset, text);
-
-    COMMIT;
-END;
-/
-
----------------------------------------------------------
--- 🟢 7. DISPLAY FINAL UPDATED RECORD
----------------------------------------------------------
-SELECT 
-    EMPLOYEE_ID,
-    FIRSTNAME,
-    LASTNAME,
-    RESUME
-FROM 
-    EMPLOYEE;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#P1
+
+# A - Show the different subsets of the whole dataset
+ 
+
+```
+tc<- read.csv("C:/Users/ADMIN/Documents/New folder/ToyottaCorolla.csv", header = TRUE)
+dim(tc)
+names(tc)
+head(tc)
+View(tc)
+tc[1:10, 1]             
+tc[1:10, 4]             
+tc[1:10, ]             
+tc[5, 1:2]              
+tc[5, 6]                
+tc[5, c(1:2, 4, 8:10)]  
+tc$FuelType[1:20]       
+length(tc$FuelType)  
+
+#b) Find mean of and summary statistics for the dataset
+
+mean(tc$Price)
+mean(tc$FuelType)
+summary(tc$Price)
+summary(tc)
+#c) The dataset has two categorical attributes, Fuel Type and Metallic. Convert these to binary variables so that categorical data is transformed into dummies.
+ 
+convert<-model.matrix(~0 + FuelType + Automatic,data = tc)
+convert<-as.data.frame(convert)
+View(convert)
+#d) Prepare the dataset for data mining techniques of supervised learning by creating partitions in R. Select all the variables and use default values for the random seed and partitioning percentages for training (50%), validation (30%), and test (20%) sets. Describe the roles that these partitions will play in modeling.
+
+train.rows<-sample(rownames(tc),dim(tc)[1]*0.5)
+valid.rows<-sample(setdiff(rownames(tc),train.rows),dim(tc)[1]*0.3)
+test.rows<-setdiff(rownames(tc),union(train.rows,valid.rows))
+#convert rows to data
+train.data<-tc[train.rows,]
+valid.data<-tc[valid.rows,]
+test.data<-tc[test.rows,]
+View(train.data)
+View(valid.data)
+View(test.data)
+
+#e) Explore the data using the data visualization capabilities of R. Which of the pairs among the variables seem to be correlated?
+
+
+install.packages("ggplot2")
+library("ggplot2")
+tcsub<-tc[1:50,]
+ggplot(data=tc,mapping=aes(x=FuelType)) + geom_bar()
+
+#barplot
+ggplot(tc,aes(x = Age, y = Price)) + geom_point(color = "red",size=1)
+ggplot(tc,aes(x=Age,y=Price,color=FuelType)) + geom_point(size = 3)
+
+
+# SCATTER PLOT
+ggplot(tc,aes(x=Age,y=Price,color=FuelType)) + geom_point(size = 3) +
+geom_smooth(method="lm")
+
+ggplot(tc,aes(x=Age,y=Price,color=FuelType)) + geom_point(size = 3) + geom_smooth(method="lm") + scale_color_manual(values = c("red","blue","yellow"))
+
+#lm is for linear method
+```
+#P2
+#The file ApplianceShipments.csv contains the series of quarterly shipments (in millions of dollars) of US household appliances between 1985 and 1989.
+#a) Create a well-formatted time plot of the data using R.
+```
+#The file ApplianceShipments.csv contains the series of quarterly shipments (in millions of dollars) of US household appliances between 1985 and 1989.
+#a) Create a well-formatted time plot of the data using R.
+
+ship<- read.csv("C:/Users/ADMIN/Downloads/ApplianceShipments.csv",header=TRUE)
+View(ship)
+summary(ship)
+shipment.ts=ts(ship$Shipments,start = c(1985,1),end = c(1989,4),frequency = 4)
+plot(shipment.ts, xlab = "Year", ylab = "Shipment (in million $)",col="blue",type="b",lwd=2.5)
+text(x = shipment.ts,labels = shipment.ts, pos = 4, cex = 0.8)
+
+#b) Using R, create one chart with four separate lines, one line for each of Q1, Q2, Q3,and Q4. In R, this can be achieved by generating a data.frame for each quarter Q1,Q2, Q3, Q4, and then plotting them as separate series on the line graph
+library(ggplot2)
+par(oma = c(0, 0, 0, 2))
+xrange <- c(1, 5)
+yrange <- range(shipment.ts)
+plot(xrange, yrange, main = "Shipments by Quarter", type = "n",
+     xlab = "Year", ylab = "Shipments", bty = "l")
+linetype <- c(1, 2, 3, 4)
+plotchar <- c(1, 2, 3, 4)
+colors <- c("red", "blue", "green", "purple")
+for (i in 1:4) {
+  current_quarter <- subset(shipment.ts, cycle(shipment.ts) == i)
+  lines(current_quarter, type = "b", lwd = 3,
+        lty = linetype[i], col = colors[i], pch = plotchar[i])
+}
+legend(x = 4, y = 4900, legend = paste("Q", 1:4, sep=""), cex = 1.2,
+       col = colors, pch = plotchar, lty = linetype, title = "Quarter")
+
+
+#c) Using R, create a line graph of the series at a yearly aggregated level (i.e., the totalshipments in each year).
+
+
+yearly <-aggregate(shipment.ts,FUN=sum)
+View(yearly)
+plot(yearly, type="b",bty="l",col="red",lwd=2)
+text(x = yearly,labels = yearly, pos = 3, cex = 0.8)
+
+```
+#P3
+#a. Create a bar chart, showing the average retail price by store. Which store has the highest average? Which has the lowest?
+ 
+
+```
+#a. Create a bar chart, showing the average retail price by store. Which store has the highest average? Which has the lowest?
+ 
+
+LS <- read.csv("C:/Users/ADMIN/Downloads/LaptopSalesJanuary2008 (2).csv",header=TRUE)
+View(LS)
+# Part A - average retail price store wise
+
+library(ggplot2)
+ggplot(LS) + geom_bar(aes(Store.Postcode,Retail.Price),stat="summary",fun.y="mean",fill="red",color="black")
+agg.data=aggregate(data =LS,Retail.Price~Store.Postcode,mean)
+View(agg.data)
+agg.data[order(agg.data$Retail.Price),]
+
+#b. To better compare retail prices across stores, create side-by-side boxplots of retail price by store. Now compare the prices in the two stores from (a). Does there seem to be a difference between their price distributions?
+
+
+ggplot(LS) + geom_boxplot(aes(Store.Postcode,Retail.Price))
+subLS=subset(LS,Store.Postcode %in% c("W4 3PH","N17 6QA"))
+ggplot(subLS) + geom_boxplot(aes(Store.Postcode,Retail.Price))
+
+
+```
+#P4
+
+#The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa, Iris virginica, Iris versicolor).
+#A) Split the data to training and test data. Build the Naïve Bayes Classifier model for this data
+#B) Build the confusion matrix.
+
+```
+
+#The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa, Iris virginica, Iris versicolor).
+#A) Split the data to training and test data. Build the Naïve Bayes Classifier model for this data
+#B) Build the confusion matrix.
+
+library(caTools)
+library(e1071)
+library(caret)
+iris.df<-read.csv("C:/Users/ADMIN/Downloads/Iris.csv")
+split<-sample.split(iris$Species,SplitRatio=0.7)
+split
+train_cl<- subset(iris,split=="TRUE")
+train_cl
+test_cl<- subset(iris,split=="FALSE")
+test_cl
+NBClassifier <- naiveBayes(Species ~ ., data = train_cl)
+NBClassifier
+pred <- predict(NBClassifier, newdata=test_cl)
+pred
+cm<- table(test_cl$Species,pred)
+cm
+confusionMatrix(cm)
+
+```
+#P5
+#The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa, Iris virginica, Iris versicolor).
+#A) Split the data to training and test data. Build the KNN model for this data with different ‘k’ values
+#B) Build the confusion matrix and calculate the accuracy for all ‘k’ values.
+
+```
+#The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa, Iris virginica, Iris versicolor).
+#A) Split the data to training and test data. Build the KNN model for this data with different ‘k’ values
+#B) Build the confusion matrix and calculate the accuracy for all ‘k’ values.
+iris.df<- read.csv("C:/Users/ADMIN/Downloads/Iris.csv")
+library(caTools) # split unction
+library(class) # knn function
+library(caret) #confusion Matrix function
+#splitting data into train and test data
+split<- sample.split(iris$Species, SplitRatio = 0.7)
+split
+train_cl<- subset(iris, split =="TRUE")
+test_cl<- subset(iris, split =="FALSE")
+
+train_scale = scale(train_cl[,1:4]) 
+test_scale = scale(test_cl[,1:4]) 
+
+#k values
+knn_1<- knn(train = train_scale,
+            test= test_scale,
+            cl = train_cl$Species,
+            k=1)
+knn_1
+
+knn_7<- knn(train = train_scale,
+            test= test_scale,
+            cl = train_cl$Species,
+            k=7)
+
+knn_15<- knn(train = train_scale,
+             test= test_scale,
+             cl = train_cl$Species,
+             k=15)
+
+knn_19<- knn(train = train_scale,
+             test= test_scale,
+             cl = train_cl$Species,
+             k=19)
+cm1<- table(test_cl$Species,knn_1)
+cm1
+confusionMatrix(cm1)
+cm7<- table(test_cl$Species,knn_7)
+cm7
+confusionMatrix(cm7)
+cm15<- table(test_cl$Species,knn_15)
+cm15
+confusionMatrix(cm15)
+cm19<- table(test_cl$Species,knn_19)
+cm19
+confusionMatrix(cm19)
+
+#Accuracy for all K values
+Error_1<- mean(knn_1 !=test_cl$Species)
+print(paste('Accuracy =', 1-Error_1))
+
+Error_7<- mean(knn_7 !=test_cl$Species)
+print(paste('Accuracy =', 1-Error_7))
+
+Error_15<- mean(knn_15 !=test_cl$Species)
+print(paste('Accuracy =', 1-Error_15))
+
+Error_19<- mean(knn_19 !=test_cl$Species)
+print(paste('Accuracy =', 1-Error_19))
+
+```
+
+#P6
+
+#The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa,Iris virginica,Iris versicolor).
+#A) Split the data to training and test data. Build the decision tree for this data
+#B) Predict the species for the test data and determine the accuracy of the model
+```
+
+#The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa,Iris virginica,Iris versicolor).
+#A) Split the data to training and test data. Build the decision tree for this data
+#B) Predict the species for the test data and determine the accuracy of the model
+
+iris.df <- read.csv("C:/Users/ADMIN/Downloads/Iris.csv",stringsAsFactors=TRUE)
+View(iris)
+
+library(caTools)
+install.packages("party")
+library(party)
+
+split<-sample.split(iris$Species,SplitRatio=0.8)
+split
+train_cl<-subset(iris,split=="TRUE")
+test_cl=subset(iris,split=="FALSE")
+
+dt<-ctree(Species~.,train_cl)
+plot(dt)
+
+p<- predict(dt,test_cl)
+p
+
+cm<- table(test_cl$Species,p)
+cm
+confusionMatrix(cm)
+
+acc<- sum(diag(cm))/sum(cm)
+print(paste("accuracy is",acc))
+
+```
+#P7
+
+#The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa,Iris virginica,Iris versicolor). Build DBScan clustering Model and plot it.
+
+
+```
+
+#The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa,Iris virginica,Iris versicolor). Build DBScan clustering Model and plot it.
+
+
+install.packages("fpc")
+library(fpc)
+iris_1 <- iris[, -5]
+set.seed(220)
+dbscan_cl <- dbscan(iris_1, eps = 0.45, MinPts = 5)
+dbscan_cl$cluster
+table(dbscan_cl$cluster, iris$Species)
+plot(dbscan_cl, iris_1, main = "DBSCAN clustering on iris dataset")
+
+```
+
+#P8
+#mtcars(motor trend car road test) comprises fuel consumption, performance and 10 aspects of automobile design for 32 automobiles. Perform hierarchical clustering and plot the dendrogram and cut the tree by the no. of clusters.
+
+```
+#mtcars(motor trend car road test) comprises fuel consumption, performance and 10 aspects of automobile design for 32 automobiles. Perform hierarchical clustering and plot the dendrogram and cut the tree by the no. of clusters.
+
+install.packages("dplyr")
+library(dplyr)
+mtcars.df<-read.csv("C:/Users/ADMIN/Downloads/mtcars.csv")
+distance_mat<-dist(mtcars,method='euclidean')
+distance_mat
+set.seed((240))
+Hierar_cl<-hclust(distance_mat,method = "average")
+Hierar_cl
+plot(Hierar_cl)
+abline(h=110,col="green")
+fit<-cutree(Hierar_cl,k=3)
+fit
+table(fit)
+rect.hclust(Hierar_cl,k=3,border = "green")
+```
 
