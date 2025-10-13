@@ -1,0 +1,265 @@
+Prac 1#------------------------------------------------------------------------------------------#
+The dataset ToyotaCorolla.csv contains data on used cars on sale during the late summer of 2004 in the Netherlands. It has 1436 records containing details on attributes, including Price, Age, Kilometers, HP, and other specifications.
+a)Show the different subsets of the whole dataset
+tc <- read.csv("C:/Users/DELL/Downloads/ToyottaCorolla.csv", header = TRUE)
+dim(tc)
+names(tc)
+head(tc)
+View(tc)
+tc[1:10, 1]             
+tc[1:10, 4]             
+tc[1:10, ]             
+tc[5, 1:2]              
+tc[5, 6]                
+tc[5, c(1:2, 4, 8:10)]  
+tc$FuelType[1:20]       
+length(tc$FuelType)     
+
+b)Find mean of and summary statistics for the dataset
+mean(tc$Price)
+mean(tc$FuelType)
+summary(tc$Price)
+summary(tc)
+
+c)The dataset has two categorical attributes, Fuel Type and Metallic. Convert these to binary variables so that categorical data is transformed into dummies.
+convert<-model.matrix(~0 + FuelType + Automatic,data = tc)
+convert<-as.data.frame(convert)
+View(convert)
+
+d)Prepare the dataset for data mining techniques of supervised learning by creating partitions in R. Select all the variables and use default values for the random seed and partitioning percentages for training (50%), validation (30%), and test (20%) sets. Describe the roles that these partitions will play in modeling.
+convert<-model.matrix(~0 + FuelType + Automatic,data = tc)
+convert<-as.data.frame(convert)
+View(convert)
+train.rows<-sample(rownames(tc),dim(tc)[1]*0.5)
+valid.rows<-sample(setdiff(rownames(tc),train.rows),dim(tc)[1]*0.3)
+test.rows<-setdiff(rownames(tc),union(train.rows,valid.rows))
+#convert rows to data
+train.data<-tc[train.rows,]
+valid.data<-tc[valid.rows,]
+test.data<-tc[test.rows,]
+View(train.data)
+View(valid.data)
+View(test.data)
+
+e)Explore the data using the data visualization capabilities of R. Which of the pairs among the variables seem to be correlated?
+install.packages("ggplot2")
+library("ggplot2")
+tcsub<-tc[1:50,]
+ggplot(data=tc,mapping=aes(x=FuelType)) + geom_bar()
+
+(or)
+ggplot(tc,aes(x=FuelType))+ geom_bar()
+ggplot(tc,aes(x=FuelType))+ geom_bar(fill="blue",color="black") +
+labs(x = "FuelType",y = "Frequency",title = "Purchases by FuelType")  
+
+---->scatter
+ggplot(tc,aes(x = Age, y = Price)) + geom_point(color = "red",size=1)
+ggplot(tc,aes(x=Age,y=Price,color=FuelType)) + geom_point(size = 3)
+
+---->Add lines
+ggplot(tc,aes(x=Age,y=Price,color=FuelType)) + geom_point(size = 3) +
+geom_smooth(method="lm")
+
+---->Choose your own Color 
+ggplot(tc,aes(x=Age,y=Price,color=FuelType)) + geom_point(size = 3) + geom_smooth(method="lm") + scale_color_manual(values = c("red","blue","yellow"))
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Prac 2#------------------------------------------------------------------------------------------#
+The file ApplianceShipments.csv contains the series of quarterly shipments (in millions of dollars) of US household appliances between 1985 and 1989.
+
+a)Create a well-formatted time plot of the data using R.
+ship<- read.csv("C:/Users/DELL/Downloads/ApplianceShipments.csv",header=TRUE)
+View(ship)
+summary(ship)
+shipment.ts=ts(ship$Shipments,start = c(1985,1),end = c(1989,4),frequency = 4)
+plot(shipment.ts, xlab = "Year", ylab = "Shipment (in million $)",col="blue",type="b",lwd=2.5)
+text(x = shipment.ts,labels = shipment.ts, pos = 4, cex = 0.8)
+
+b)Using R, create one chart with four separate lines, one line for each of Q1, Q2, Q3,and Q4. In R, this can be achieved by generating a data.frame for each quarter Q1,Q2, Q3, Q4, and then plotting them as separate series on the line graph.
+
+library(ggplot2)
+par(oma = c(0, 0, 0, 2))
+xrange <- c(1, 5)
+yrange <- range(shipment.ts)
+plot(xrange, yrange, main = "Shipments by Quarter", type = "n",
+     xlab = "Year", ylab = "Shipments", bty = "l")
+linetype <- c(1, 2, 3, 4)
+plotchar <- c(1, 2, 3, 4)
+colors <- c("red", "blue", "green", "purple")
+for (i in 1:4) {
+  current_quarter <- subset(shipment.ts, cycle(shipment.ts) == i)
+  lines(current_quarter, type = "b", lwd = 3,
+        lty = linetype[i], col = colors[i], pch = plotchar[i])
+}
+legend(x = 4, y = 4900, legend = paste("Q", 1:4, sep=""), cex = 1.2,
+       col = colors, pch = plotchar, lty = linetype, title = "Quarter")
+
+c)Using R, create a line graph of the series at a yearly aggregated level (i.e., the totalshipments in each year).
+
+yearly <-aggregate(shipment.ts,FUN=sum)
+View(yearly)
+plot(yearly, type="b",bty="l",col="red",lwd=2)
+text(x = yearly,labels = yearly, pos = 3, cex = 0.8)
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Prac 3#------------------------------------------------------------------------------------------#
+Laptop Sales at a London Computer Chain: The file LaptopSalesJanuary2008.csv contains data for all sales of laptops at a computer chain in London in January 2008. This is a subset of the full dataset that includes data for the entire year
+
+a)Create a bar chart, showing the average retail price by store. Which store has the highest average? Which has the lowest?
+
+LS <- read.csv("C:/Users/DELL/Downloads/LaptopSalesJanuary2008 (2).csv",header=TRUE)
+View(LS)
+library(ggplot2)
+ggplot(LS) + geom_bar(aes(Store.Postcode,Retail.Price),stat="summary",fun.y="mean",fill="red",color="black")
+agg.data=aggregate(data =LS,Retail.Price~Store.Postcode,mean)
+View(agg.data)
+agg.data[order(agg.data$Retail.Price),]
+
+b)To better compare retail prices across stores, create side-by-side boxplots of retail price by store. Now compare the prices in the two stores from (a). Does there seem to be a difference between their price distributions?
+
+ggplot(LS) + geom_boxplot(aes(Store.Postcode,Retail.Price))
+subLS=subset(LS,Store.Postcode %in% c("W4 3PH","N17 6QA"))
+ggplot(subLS) + geom_boxplot(aes(Store.Postcode,Retail.Price))
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Prac 4#------------------------------------------------------------------------------------------#
+The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa,Iris virginica,Iris versicolor)
+
+A) Split the data to training and test data. Build the Naïve Bayes Classifier model for this data
+B) Build the confusion matrix.
+
+library(caTools)
+library(e1071)
+library(caret)
+iris.df<-read.csv("C:/Users/DELL/Downloads/Iris.csv")
+split<-sample.split(iris$Species,SplitRatio=0.7)
+split
+train_cl<- subset(iris,split=="TRUE")
+train_cl
+test_cl<- subset(iris,split=="FALSE")
+test_cl
+NBClassifier <- naiveBayes(Species ~ ., data = train_cl)
+NBClassifier
+pred <- predict(NBClassifier, newdata=test_cl)
+pred
+cm<- table(test_cl$Species,pred)
+cm
+confusionMatrix(cm)
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Prac 5#------------------------------------------------------------------------------------------#
+
+The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa, Iris virginica, Iris versicolor).
+
+a)Split the data to training and test data. Build the KNN model for this data with different ‘k’ values
+iris.df<- read.csv("Iris.csv")
+library(caTools) 
+library(class)
+library(caret) 
+split<- sample.split(iris$Species, SplitRatio = 0.7)
+split
+train_cl<- subset(iris, split =="TRUE")
+test_cl<- subset(iris, split =="FALSE")
+train_scale = scale(train_cl[,1:4]) #first 4 columns of cl
+test_scale = scale(test_cl[,1:4]) #first 4 columns of cl
+knn_1<- knn(train = train_scale,
+            test= test_scale,
+            cl = train_cl$Species,
+            k=1)
+knn_1
+knn_7<- knn(train = train_scale,
+            test= test_scale,
+            cl = train_cl$Species,
+            k=7)
+knn_15<- knn(train = train_scale,
+             test= test_scale,
+             cl = train_cl$Species,
+             k=15)
+knn_19<- knn(train = train_scale,
+            test= test_scale,
+             cl = train_cl$Species,
+             k=19)
+cm1<- table(test_cl$Species,knn_1)
+cm1
+confusionMatrix(cm1)
+cm7<- table(test_cl$Species,knn_7)
+cm7
+confusionMatrix(cm7)
+cm15<- table(test_cl$Species,knn_15)
+cm15
+confusionMatrix(cm15)
+cm19<- table(test_cl$Species,knn_19)
+cm19
+confusionMatrix(cm19)
+
+b)Build the confusion matrix and calculate the accuracy for all ‘k’ values
+
+Error_1<- mean(knn_1 !=test_cl$Species)
+print(paste('Accuracy =', 1-Error_1))
+Error_7<- mean(knn_7 !=test_cl$Species)
+print(paste('Accuracy =', 1-Error_7))
+Error_15<- mean(knn_15 !=test_cl$Species)
+print(paste('Accuracy =', 1-Error_15))
+Error_19<- mean(knn_19 !=test_cl$Species)
+print(paste('Accuracy =', 1-Error_19)
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Prac 6#------------------------------------------------------------------------------------------#
+The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa,Iris virginica,Iris versicolor).
+
+a)Split the data to training and test data. Build the decision tree for this data
+b)Predict the species for the test data and determine the accuracy of the model
+
+iris.df <- read.csv("Iris.csv",stringsAsFactors=TRUE)
+View(iris)
+library(caTools)
+install.packages("party")
+library(party)
+split<-sample.split(iris$Species,SplitRatio=0.8)
+split
+train_cl<-subset(iris,split=="TRUE")
+test_cl=subset(iris,split=="FALSE")
+dt<-ctree(Species~.,train_cl)
+plot(dt)
+p<- predict(dt,test_cl)
+p
+cm<- table(test_cl$Species,p)
+cm
+confusionMatrix(cm)
+acc<- sum(diag(cm))/sum(cm)
+print(paste("accuracy is",acc))
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Prac 7#------------------------------------------------------------------------------------------#
+
+The file Iris.csv contains 50 samples from each of 3 species of Iris (Iris setosa,Iris virginica,Iris versicolor). Build DBScan clustering Model and plot it.
+
+library(fpc)
+iris_1 <- iris[, -5]
+set.seed(220)
+dbscan_cl <- dbscan(iris_1, eps = 0.45, MinPts = 5)
+dbscan_cl ; dbscan_cl$cluster
+table(dbscan_cl$cluster, iris$Species)
+plot(dbscan_cl, iris_1, main = "DBSCAN clustering on iris dataset")
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Prac 8#------------------------------------------------------------------------------------------#
+
+mtcars(motor trend car road test) comprises fuel consumption, performance and 10 aspects of automobile design for 32 automobiles. Perform hierarchical clustering an
+d plot the dendrogram and cut the tree by the no. of clusters.
+
+install.packages("dplyr")
+library(dplyr)
+mtcars.df<-read.csv("C:/Users/DELL/Downloads/mtcars.csv")
+distance_mat<-dist(mtcars,method='euclidean')
+distance_mat
+set.seed((240))
+Hierar_cl<-hclust(distance_mat,method = "average")
+Hierar_cl
+plot(Hierar_cl)
+abline(h=110,col="green")
+fit<-cutree(Hierar_cl,k=3)
+fit
+table(fit)
+rect.hclust(Hierar_cl,k=3,border = "green")
+
